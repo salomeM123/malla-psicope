@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Malla Psicopedagogía UNLZ</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #fdf6f0; color: #333; padding: 20px; }
+    h1 { color: #7a5c61; }
+    .anio { margin-bottom: 40px; }
+    .materia {
+      display: inline-block;
+      background: #fde2e4;
+      border: 2px solid #f8c8dc;
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin: 5px;
+      opacity: .5;
+      cursor: default;
+      transition: background .3s, opacity .3s;
+    }
+    .materia.activa {
+      background: #bde0fe;
+      border-color: #a2d2ff;
+      opacity: 1;
+      cursor: pointer;
+    }
+    .materia.aprobada {
+      background: #caffbf;
+      border-color: #b5e48c;
+      text-decoration: line-through;
+      opacity: 1;
+    }
+    button { margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Malla Interactiva – Psicopedagogía UNLZ</h1>
+  <button id="reset">🔄 Reiniciar progreso</button>
+
+  <!-- Generación automática de la malla -->
+  <div id="malla"></div>
+
+  <script>
+    const plan = [
+      { año: 1, id: 'filo', name: 'Filosofía', correlativas: [] },
+      { año: 1, id: 'historia_social', name: 'Historia Social General', correlativas: [] },
+      { año: 1, id: 'soc', name: 'Introducción a la Sociología', correlativas: [] },
+      { año: 1, id: 'psic_gen', name: 'Psicología General', correlativas: [] },
+      { año: 1, id: 'practica', name: 'Introducción a la Práctica Psicopedagógica', correlativas: [] },
+      { año: 1, id: 'edu_intro', name: 'Introducción a la Educación', correlativas: [] },
+      { año: 1, id: 'taller_lec', name: 'Taller de Lectura y Escritura', correlativas: [] },
+      // 2º año
+      { año: 2, id: 'pedagogia', name: 'Pedagogía', correlativas: [] },
+      { año: 2, id: 'bio_edu', name: 'Fundamentos Biológicos para la Educación', correlativas: [] },
+      { año: 2, id: 'des_i', name: 'Psicología del Desarrollo I', correlativas: [] },
+      { año: 2, id: 'psic_social', name: 'Psicología Social', correlativas: [] },
+      { año: 2, id: 'antro', name: 'Antropología Cultural', correlativas: [] },
+      { año: 2, id: 'des_ii', name: 'Psicología del Desarrollo II', correlativas: ['des_i'] },
+      { año: 2, id: 'teorias', name: 'Teorías del Aprendizaje', correlativas: ['des_i','des_ii'] },
+      { año: 2, id: 'hist_edu', name: 'Historia de la Educación', correlativas: [] },
+      // 3º año
+      { año: 3, id: 'metod', name: 'Metodología de la Investigación Social', correlativas: [] },
+      { año: 3, id: 'psicoanalit', name: 'Teorías Psicoanalíticas Contemporáneas', correlativas: [] },
+      { año: 3, id: 'didactica_i', name: 'Didáctica I', correlativas: [] },
+      { año: 3, id: 'ped_especial', name: 'Pedagogía Especial', correlativas: [] },
+      { año: 3, id: 'neuroinf', name: 'Elementos de Neuropsicología Infantil', correlativas: [] },
+      { año: 3, id: 'psicopat_i', name: 'Psicopatología del Desarrollo I', correlativas: [] },
+      // 4º año
+      { año: 4, id: 'ling_sem', name: 'Lingüística y Semiótica', correlativas: [] },
+      { año: 4, id: 'epistemo', name: 'Epistemología y Psicología Genética', correlativas: [] },
+      { año: 4, id: 'tecn_expl', name: 'Téc. de Exploración Psicopedagógicas', correlativas: [] },
+      { año: 4, id: 'didactica_ii', name: 'Didáctica II', correlativas: ['didactica_i'] },
+      { año: 4, id: 'leng_sint', name: 'Estudio del Lenguaje y sus Trastornos', correlativas: [] },
+      { año: 4, id: 'diagnostico', name: 'Diagnóstico Psicopedagógico', correlativas: [] },
+      { año: 4, id: 'estrategias', name: 'Estrategias para Dificultades del Aprendizaje', correlativas: [] },
+      { año: 4, id: 'ped_instit', name: 'Pedagogía Institucional', correlativas: [] },
+      { año: 4, id: 'clinica', name: 'Clínica Psicopedagógica', correlativas: [] },
+      // 5º año
+      { año: 5, id: 'psicoanalit_ninos', name: 'Abordaje Psicoanalítico en Niños y Adolescentes', correlativas: [] },
+      { año: 5, id: 'teoria_edu', name: 'Teoría de la Educación', correlativas: [] },
+      { año: 5, id: 'psicopat_ii', name: 'Psicopatología del Desarrollo II', correlativas: ['psicopat_i'] },
+      { año: 5, id: 'optativa', name: 'Optativa', correlativas: [] },
+      { año: 5, id: 'idioma', name: 'Idioma Extranjero', correlativas: [] }
+    ];
+
+    let progreso = JSON.parse(localStorage.getItem('progUNLZ')) || [];
+    const cont = document.getElementById('malla');
+
+    function render() {
+      cont.innerHTML = '';
+      [1,2,3,4,5].forEach(anio => {
+        const divA = document.createElement('div');
+        divA.className = 'anio';
+        divA.innerHTML = `<h2>${anio}º Año</h2>`;
+        plan.filter(m => m.año===anio).forEach(m => {
+          const d = document.createElement('div');
+          d.className = 'materia';
+          d.textContent = m.name;
+          d.dataset.id = m.id;
+          d.dataset.cor = m.correlativas.join(',');
+          if (progreso.includes(m.id)) d.classList.add('aprobada');
+          else if (m.correlativas.every(r => progreso.includes(r))) {
+            d.classList.add('activa');
+            d.addEventListener('click', () => {
+              progreso.push(m.id);
+              localStorage.setItem('progUNLZ', JSON.stringify(progreso));
+              render();
+            });
+          }
+          divA.appendChild(d);
+        });
+        cont.appendChild(divA);
+      });
+    }
+
+    document.getElementById('reset').onclick = () => {
+      if(confirm('¿Reiniciar progreso?')) {
+        progreso = [];
+        localStorage.removeItem('progUNLZ');
+        render();
+      }
+    };
+
+    render();
+  </script>
+</body>
+</html>
